@@ -23,19 +23,23 @@ if [ ! -z "$SERVER_ID" ] ; then
 
   # Find the zookeepers exposed in env.
   ZOOKEEPER_CONNECT=""
-  for i in `echo {1..15}`; do
-    ZK_CLIENT_HOST=`envValue ZK_CLIENT_${i}_SERVICE_HOST`
-    ZK_CLIENT_PORT=`envValue ZK_CLIENT_${i}_SERVICE_PORT`
+  if [ -z "$ZOOKEEPER_SERVICE_HOST" ] || [ -z "$ZOOKEEPER_SERVICE_PORT" ] ; then
+    for i in `echo {1..15}`; do
+      ZOOKEEPER_SERVICE_HOST=`envValue ZOOKEEPER_${i}_SERVICE_HOST`
+      ZOOKEEPER_SERVICE_PORT=`envValue ZOOKEEPER_${i}_SERVICE_PORT`
 
-    if [ -z "$ZK_CLIENT_HOST" ] || [ -z "$ZK_CLIENT_PORT" ] ; then
-      break
-    else
-      if [ ! -z $ZOOKEEPER_CONNECT ] ; then
-        ZOOKEEPER_CONNECT="${ZOOKEEPER_CONNECT},"
+      if [ -z "$ZOOKEEPER_SERVICE_HOST" ] || [ -z "$ZOOKEEPER_SERVICE_PORT" ] ; then
+        break
+      else
+        if [ ! -z $ZOOKEEPER_CONNECT ] ; then
+          ZOOKEEPER_CONNECT="${ZOOKEEPER_CONNECT},"
+        fi
+        ZOOKEEPER_CONNECT="${ZOOKEEPER_CONNECT}${ZOOKEEPER_SERVICE_HOST}:${ZOOKEEPER_SERVICE_PORT}"
       fi
-      ZOOKEEPER_CONNECT="${ZOOKEEPER_CONNECT}${ZK_CLIENT_HOST}:${ZK_CLIENT_PORT}"
-    fi
-  done
+    done
+  else
+    ZOOKEEPER_CONNECT="${ZOOKEEPER_CONNECT}${ZOOKEEPER_SERVICE_HOST}:${ZOOKEEPER_SERVICE_PORT}"
+  fi
 fi
 
 # Build the server configuration
